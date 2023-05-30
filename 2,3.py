@@ -13,7 +13,7 @@ if lectura.status_code == 200:
 
     with open("endpoint.csv", mode='w', newline='') as file:
         escritor = csv.writer(file, delimiter='\t')
-        escritor.writerow(["author", "quote"])
+        escritor.writerow(["autor", "cita"])
         escritor.writerows(valores)
 
     print("Archivo CSV guardado exitosamente.")
