@@ -38,5 +38,5 @@ with open('/var/log/audit/audit.log', 'r') as archivo:
                 # Incrementar el contador de intentos fallidos
                 failed_attempts_count += 1
 
-# Mostrar el resultado
+# Mostrar el resultado sin segundos
 print(f"Cantidad de intentos fallidos de inicio de sesión en el rango {current_day} {start_time.strftime('%H:%M')} - {end_time.strftime('%H:%M')}: {failed_attempts_count}")
