@@ -8,18 +8,11 @@ now = datetime.datetime.now()
 last_closed_hour = now - datetime.timedelta(hours=1)
 start_time = last_closed_hour.replace(minute=0, second=0, microsecond=0)
 
-# Obtener la hora de fin del intervalo (hora actual redondeada hacia arriba)
-if now.hour == 0:
-    end_time = now.replace(hour=23, minute=59, second=59, microsecond=0)
-else:
-    end_time = now.replace(hour=now.hour-1, minute=59, second=59, microsecond=0)
-
-# Obtener el día actual en formato 'May 29'
-current_day = now.strftime('%b %d')
+# Obtener la hora de fin del intervalo (hora actual redondeada hacia abajo)
+end_time = now.replace(minute=0, second=0, microsecond=0)
 
 # Manejar el cambio de día
-if last_closed_hour.day != now.day:
-    current_day = last_closed_hour.strftime('%b %d') + ' - ' + now.strftime('%b %d')
+current_day = last_closed_hour.strftime('%b %d') + ' - ' + end_time.strftime('%b %d')
 
 # Abrir el archivo de registro
 with open('/var/log/audit/audit.log', 'r') as archivo:
@@ -38,5 +31,5 @@ with open('/var/log/audit/audit.log', 'r') as archivo:
                 # Incrementar el contador de intentos fallidos
                 failed_attempts_count += 1
 
-# Mostrar el resultado
+# Mostrar el resultado sin segundos
 print(f"Cantidad de intentos fallidos de inicio de sesión en el rango {current_day} {start_time.strftime('%H:%M')} - {end_time.strftime('%H:%M')}: {failed_attempts_count}")
