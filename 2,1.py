@@ -5,37 +5,38 @@
 # sudo yum install git -y
 #considerando que nosotros utilizamos la máquian virtual en aws nuestra ruta es /var/log/audit/audit.log en caso de utilizar la máquina de clases es /var/log/secure
 
-import subprocess
+import os
 import datetime
 
-# Obtener la fecha y hora actual
+# Obtener la hora actual
 ahora = datetime.datetime.now()
 
-# Calcular la última hora cerrada
-ultima_hora_cerrada = ahora.replace(minute=0, second=0, microsecond=0) - datetime.timedelta(hours=1)
+# Obtener la hora de inicio de la última hora cerrada
+ultima_hora_cerrada = ahora - datetime.timedelta(hours=1)
+hora_inicio = ultima_hora_cerrada.replace(minute=0, second=0, microsecond=0)
 
-# Obtener la fecha y hora de inicio y finalización del rango
-if ultima_hora_cerrada.hour == 0:  # Si la última hora es medianoche
-    hora_inicio = ultima_hora_cerrada.replace(hour=23)
-    hora_termino = ultima_hora_cerrada
-else:
-    hora_inicio = ultima_hora_cerrada.replace(hour=ultima_hora_cerrada.hour - 1)
-    hora_termino = ultima_hora_cerrada
+# Obtener la hora de fin del intervalo (hora actual redondeada hacia abajo)
+hora_termino = ahora.replace(minute=0, second=0, microsecond=0)
 
-# Formatear las fechas y horas como cadenas
-hora_inicio_str = hora_inicio.strftime("%b %d %H")
-hora_termino_str = hora_termino.strftime("%b %d %H")
+# Manejar el cambio de día
+dia_actual = ultima_hora_cerrada.strftime('%b %d') + ' - ' + hora_termino.strftime('%b %d')
 
-# Construir el comando grep para filtrar el archivo de registro
-busqueda = f"grep 'authentication' /var/log/audit/audit.log | grep '{hora_inicio_str}\|{hora_termino_str}'"
+# Abrir el archivo de registro
+with open('/var/log/audit/audit.log', 'r') as archivo:
+    # Inicializar contador de intentos fallidos
+    contador_intentos_fallidos = 0
+    
+    # Leer cada línea del archivo
+    for linea in archivo:
+        # Buscar las líneas que contienen "authentication" y están dentro del rango de tiempo
+        if 'authentication' in linea and dia_actual in linea:
+            timestamp = linea.split()[1]
+            # Obtener la hora de la línea en formato 'HH:MM:SS'
+            hora = datetime.datetime.strptime(timestamp, '%H:%M:%S').time()
+            # Verificar si la hora está dentro del rango deseado
+            if hora_inicio.time() <= hora <= hora_termino.time():
+                # Incrementar el contador de intentos fallidos
+                contador_intentos_fallidos += 1
 
-try:
-    # Ejecutar el comando grep y contar las líneas de salida
-    salida = subprocess.check_output(busqueda, shell=True)
-    intentos_fallidos = len(salida.decode().split('\n')) - 1
-except subprocess.CalledProcessError:
-    # Si no hay coincidencias, establecer la cantidad de intentos fallidos en 0
-    intentos_fallidos = 0
-
-# Mostrar el resultado
-print(f"Cantidad de intentos fallidos de inicio de sesión en el rango {hora_inicio_str}:00 - {hora_termino_str}:00: {intentos_fallidos}")
+# Mostrar el resultado sin segundos
+print(f"Cantidad de intentos fallidos de inicio de sesión en el rango {dia_actual} {hora_inicio.strftime('%H:%M')} - {hora_termino.strftime('%H:%M')}: {contador_intentos_fallidos}")
