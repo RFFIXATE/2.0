@@ -11,8 +11,8 @@ if lectura.status_code == 200:
     cita = data['quotes']
     valores = [[quote['author'], quote['quote']] for quote in cita]
 
-    with open("endpoint.csv", mode='w', newline='') as file:
-        escritor = csv.writer(file, delimiter='\t')
+    with open("endpoint.csv", mode='w', newline='') as archivo:
+        escritor = csv.writer(archivo, delimiter='\t')
         escritor.writerow(["autor", "cita"])
         escritor.writerows(valores)
 
