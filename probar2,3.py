@@ -1,9 +1,9 @@
 import csv
 
-with open("endpoint.csv", mode='r') as file:
-    reader = csv.reader(file, delimiter='\t')
-    next(reader)  # Omitir la primera fila (cabecera)
-    for row in reader:
+with open("endpoint.csv", mode='r') as archivo:
+    lector = csv.reader(archivo, delimiter='\t')
+    next(lector)  # Omitir la primera fila (cabecera)
+    for row in lector:
         author = row[0]
         quote = row[1]
         print("Autor:", author)
